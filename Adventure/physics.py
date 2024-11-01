@@ -16,10 +16,9 @@ class PhysicBody:
         self.resistance = 0
         self.gravity = 200
         self.mass = 5
-        self.scroll_x = 0
 
-    def draw(self, sc):
-        sc.blit(self.image, (self.rect.x+self.scroll_x, self.rect.y))
+    def draw(self, sc, scroll_x, scroll_y):
+        sc.blit(self.image, (self.rect.x-scroll_x, self.rect.y-scroll_y))
 
     def gravity_down(self):
         self.rect.y += self.gravity-self.resistance
