@@ -43,26 +43,23 @@ class Player(PhysicBody):
         self.dash_len = 200
         self.dash = True
         self.double_jump = True
-        self.scroll_x = 0
 
-    def eyes_draw(self, sc):
-        sc.blit(self.eyes_image, (self.rect.x+self.scroll_x, self.rect.y+10))
+    def eyes_draw(self, sc, scroll_x, scroll_y):
+        sc.blit(self.eyes_image, (self.rect.x-scroll_x, self.rect.y+10-scroll_y))
 
-    def draws(self, sc):
-        sc.blit(self.image, (self.rect.x+self.scroll_x, self.rect.y))
+    def draw(self, sc, scroll_x, scroll_y):
+        sc.blit(self.image, (self.rect.x-scroll_x, self.rect.y-scroll_y))
         if self.timer < self.cooldown:
-            pg.draw.rect(sc, WHITE, (self.rect.x+self.scale//2+self.scroll_x, self.rect.y - 20, self.timer, 10))
-            pg.draw.rect(sc, WHITE, ((self.rect.x+self.scale//2)-self.timer+self.scroll_x, self.rect.y - 20, self.timer, 10))
+            pg.draw.rect(sc, WHITE, (self.rect.x+self.scale//2-scroll_x, self.rect.y - 20-scroll_y, self.timer, 10))
+            pg.draw.rect(sc, WHITE, ((self.rect.x+self.scale//2)-self.timer-scroll_x, self.rect.y - 20-scroll_y, self.timer, 10))
 
     def move(self, speed, jump) -> None:
         keys = pg.key.get_pressed()
         if keys[pg.K_d]:
-            self.scroll_x -= speed
             self.rect.x += speed
             self.direction = "right"
 
         if keys[pg.K_a]:
-            self.scroll_x += speed
             self.rect.x -= speed
             self.direction = "left"
 
@@ -87,4 +84,4 @@ class Player(PhysicBody):
 
     def eyes_animator(self):
         self.eyes_image = anim1.update_anim()
-        self.eyes_image = pg.transform.scale(self.eyes_image, (self.scale, self.scale))
+        self.eyes_ima
