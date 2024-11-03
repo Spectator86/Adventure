@@ -1,4 +1,4 @@
-from colors import WHITE
+from settings import *
 from physics import *
 from anim import *
 import pygame as pg
