@@ -1,6 +1,5 @@
-from colors import WHITE
-from physics import *
 from settings import *
+from physics import *
 from anim import *
 import pygame as pg
 
@@ -32,7 +31,7 @@ anim1 = Anim(eyes_anim_list, 15)
 timer = 0
 
 class Player(PhysicBody):
-        def __init__(self, x, y, file, eyes, scale, angle, speed):
+    def __init__(self, x, y, file, eyes, scale, angle, speed):
         super().__init__(x, y, file,  scale, angle)
         self.speed = speed
         self.eyes_image = pg.image.load(eyes).convert_alpha()
@@ -42,7 +41,7 @@ class Player(PhysicBody):
         self.direction = " "
         self.cooldown = 60
         self.timer = self.cooldown
-        self.dash_len = 200
+        self.dash_len = 400
         self.dash = True
         self.double_jump = True
         self.dashedR = False
@@ -52,7 +51,7 @@ class Player(PhysicBody):
         self.idle = False
 
     def eyes_draw(self, sc, scroll_x, scroll_y):
-        sc.blit(self.eyes_image, (self.rect.x-scroll_x, self.rect.y+10-scroll_y))
+        sc.blit(self.eyes_image, (self.rect.x-scroll_x+self.mef, self.rect.y+10-scroll_y))
 
     def draw(self, sc, scroll_x, scroll_y):
         sc.blit(self.image, (self.rect.x-scroll_x, self.rect.y-scroll_y))
@@ -60,17 +59,22 @@ class Player(PhysicBody):
             pg.draw.rect(sc, WHITE, (self.rect.x+self.scale//2-scroll_x, self.rect.y - 20-scroll_y, self.timer, 10))
             pg.draw.rect(sc, WHITE, ((self.rect.x+self.scale//2)-self.timer-scroll_x, self.rect.y - 20-scroll_y, self.timer, 10))
 
-    def move(self, speed, jump) -> None:
+    def move(self, jump) -> None:
         keys = pg.key.get_pressed()
         if keys[pg.K_d]:
-            self.rect.x += speed
+            self.rect.x += self.speed
             self.direction = "right"
+            self.idle = False
 
-        if keys[pg.K_a]:
-            self.rect.x -= speed
+        elif keys[pg.K_a]:
+            self.rect.x -= self.speed
             self.direction = "left"
+            self.idle = False
 
-                if keys[pg.K_e] and self.dash:
+        else:
+            self.idle = True
+
+        if keys[pg.K_e] and self.dash:
             if self.timer >= self.cooldown:
                 if self.direction == "right":
                     self.dashedR = True
@@ -96,21 +100,23 @@ class Player(PhysicBody):
             self.angle = 10
 
         if self.dashedR and self.rect.x < self.new_dash:
-            self.rect.x += 20
+            self.rect.x += 30
         else:
             self.dashedR = False
         if self.dashedL and self.rect.x > self.new_dash:
-            self.rect.x -= 40
+            self.rect.x -= 30
         else:
             self.dashedL = False
 
         if keys[pg.K_SPACE] and self.rect.y >= floor:
             self.resistance = jump
 
-    def animator(self) -> None:
+    def animator(self):
         self.image = anim.update_anim()
         self.image = pg.transform.scale(self.image, (self.scale, self.scale))
+        self.image = pg.transform.rotate(self.image, self.angle)
 
     def eyes_animator(self):
         self.eyes_image = anim1.update_anim()
-        self.eyes_ima
+        self.eyes_image = pg.transform.scale(self.eyes_image, (self.scale, self.scale))
+        self.eyes_image = pg.transform.rotate(self.eyes_image, self.angle)
