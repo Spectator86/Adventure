@@ -32,10 +32,12 @@ anim1 = Anim(eyes_anim_list, 15)
 timer = 0
 
 class Player(PhysicBody):
-    def __init__(self, x, y, file, eyes, scale, angle):
+        def __init__(self, x, y, file, eyes, scale, angle, speed):
         super().__init__(x, y, file,  scale, angle)
+        self.speed = speed
         self.eyes_image = pg.image.load(eyes).convert_alpha()
         self.eyes_image = pg.transform.scale(self.eyes_image, (scale, scale))
+        self.eyes_image = pg.transform.rotate(self.eyes_image, angle)
         self.count = 0
         self.direction = " "
         self.cooldown = 60
@@ -43,6 +45,11 @@ class Player(PhysicBody):
         self.dash_len = 200
         self.dash = True
         self.double_jump = True
+        self.dashedR = False
+        self.dashedL = False
+        self.new_dash = 0
+        self.mef = 0
+        self.idle = False
 
     def eyes_draw(self, sc, scroll_x, scroll_y):
         sc.blit(self.eyes_image, (self.rect.x-scroll_x, self.rect.y+10-scroll_y))
@@ -63,17 +70,39 @@ class Player(PhysicBody):
             self.rect.x -= speed
             self.direction = "left"
 
-        if keys[pg.K_e] and self.dash:
+                if keys[pg.K_e] and self.dash:
             if self.timer >= self.cooldown:
                 if self.direction == "right":
-                    self.rect.x += self.dash_len
+                    self.dashedR = True
+                    self.new_dash = self.rect.x + self.dash_len
                     self.timer = 0
 
-                if self.direction == "left":
-                    self.rect.x -= self.dash_len
+                elif self.direction == "left":
+                    self.dashedL = True
+                    self.new_dash = self.rect.x - self.dash_len
                     self.timer = 0
+
         if self.timer < self.cooldown:
             self.timer += 1
+
+        if self.idle:
+            self.mef = 0
+            self.angle = 0
+        elif self.direction == "right":
+            self.mef = 5
+            self.angle = -10
+        elif self.direction == "left":
+            self.mef = -5
+            self.angle = 10
+
+        if self.dashedR and self.rect.x < self.new_dash:
+            self.rect.x += 20
+        else:
+            self.dashedR = False
+        if self.dashedL and self.rect.x > self.new_dash:
+            self.rect.x -= 40
+        else:
+            self.dashedL = False
 
         if keys[pg.K_SPACE] and self.rect.y >= floor:
             self.resistance = jump
