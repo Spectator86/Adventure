@@ -41,7 +41,7 @@ class Player(PhysicBody):
         self.direction = " "
         self.cooldown = 60
         self.timer = self.cooldown
-        self.dash_len = 400
+        self.dash_len = 500
         self.dash = True
         self.double_jump = True
         self.dashedR = False
@@ -50,16 +50,42 @@ class Player(PhysicBody):
         self.mef = 0
         self.idle = False
 
+        self.rightAllow = True
+        self.leftAllow = True
+
     def eyes_draw(self, sc, scroll_x, scroll_y):
         sc.blit(self.eyes_image, (self.rect.x-scroll_x+self.mef, self.rect.y+10-scroll_y))
 
     def draw(self, sc, scroll_x, scroll_y):
         sc.blit(self.image, (self.rect.x-scroll_x, self.rect.y-scroll_y))
+
+        self.bottom.x = self.rect.x + 5
+        self.bottom.y = self.rect.y + self.scale
+
+        self.top.x = self.rect.x + 5
+        self.top.y = self.rect.y - 2
+
+        self.right.x = self.rect.x + self.scale
+        self.right.y = self.rect.y - 2
+
+        self.left.x = self.rect.x - 2
+        self.left.y = self.rect.y + 5
+
         if self.timer < self.cooldown:
             pg.draw.rect(sc, WHITE, (self.rect.x+self.scale//2-scroll_x, self.rect.y - 20-scroll_y, self.timer, 10))
             pg.draw.rect(sc, WHITE, ((self.rect.x+self.scale//2)-self.timer-scroll_x, self.rect.y - 20-scroll_y, self.timer, 10))
 
-    def move(self, jump) -> None:
+    def move(self, jump, colliders) -> None:
+        for i in colliders:
+            if self.right.colliderect(i):
+                self.rightAllow = False
+            else:
+                self.rightAllow = True
+            if self.left.colliderect(i):
+                self.leftAllow = False
+            else:
+                self.leftAllow = True
+
         keys = pg.key.get_pressed()
         if keys[pg.K_d]:
             self.rect.x += self.speed
@@ -107,8 +133,7 @@ class Player(PhysicBody):
             self.rect.x -= 30
         else:
             self.dashedL = False
-
-        if keys[pg.K_SPACE] and self.rect.y >= floor:
+        if keys[pg.K_SPACE] and self.grounded:
             self.resistance = jump
 
     def animator(self):
